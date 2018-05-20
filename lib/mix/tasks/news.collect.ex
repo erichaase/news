@@ -19,12 +19,30 @@ defmodule Mix.Tasks.News.Collect do
   # TODO: run this asynchronous
   defp process_story(id) do
     HackerNews.get_story(id)
-    |> save_story
+    |> build_post
+    |> upsert_post
   end
 
-  # TODO: run this asynchronous
-  defp save_story(story) do
-    Mix.shell.info inspect story
+  defp build_post(story) do
+    %News.Post{
+      id_external: story["id"],
+      url: story["url"],
+      title: story["title"],
+      n_points: story["score"],
+      n_comments: story["descendants"],
+      published_at: build_published_at(story["time"])
+    }
+  end
+
+  defp build_published_at(unix_time) do
+    case DateTime.from_unix(unix_time) do
+      {:ok, datetime} -> datetime
+      _               -> nil
+    end
+  end
+
+  defp upsert_post(post) do
+    Mix.shell.info(inspect post, pretty: true)
   end
 end
 
