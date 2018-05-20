@@ -13,11 +13,17 @@ defmodule Mix.Tasks.News.Collect do
 
     HackerNews.get_new_story_ids
     # |> Enum.slice(0, 1)
-    |> Enum.each(&process_story/1)
+    |> Enum.map(&start_task/1)
+    |> Enum.each(&Task.await/1)
   end
 
-  # TODO: run this asynchronous
-  defp process_story(id) do
+  defp start_task(story_id) do
+    # TODO: avoid parent crashing when child crashes
+    Task.async(Mix.Tasks.News.Collect, :process_story, [story_id])
+  end
+
+  # TODO: move this into its own module/file
+  def process_story(id) do
     if post = HackerNews.get_story(id) do
       post |> build_post |> upsert_post
     end
@@ -43,7 +49,7 @@ defmodule Mix.Tasks.News.Collect do
 
   defp upsert_post(post) do
     case News.Repo.insert(post, on_conflict: :replace_all, conflict_target: :id_external) do
-      {:ok, p} -> Mix.shell.info(inspect p, pretty: true)
+      {:ok, p} -> Mix.shell.info(inspect p)
       # TODO: add notifications for these errors
       {:error, cs} -> Mix.shell.error(inspect cs, pretty: true)
     end
