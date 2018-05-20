@@ -18,7 +18,12 @@ defmodule Mix.Tasks.News.Collect do
 
   # TODO: run this asynchronous
   defp process_story(id) do
-    story = HackerNews.get_story(id)
+    HackerNews.get_story(id)
+    |> save_story
+  end
+
+  # TODO: run this asynchronous
+  defp save_story(story) do
     Mix.shell.info inspect story
   end
 end
