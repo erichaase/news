@@ -20,6 +20,7 @@ defmodule News.Post do
   def changeset(post, attrs) do
     post
     |> cast(attrs, [:id_external, :url, :title, :n_points, :n_comments, :published_at, :read_at, :clicked_at])
-    |> validate_required([:id_external, :url, :title, :n_points, :n_comments, :published_at, :read_at, :clicked_at])
+    # |> validate_required([:id_external, :url, :title, :n_points, :n_comments, :published_at, :read_at, :clicked_at])
+    |> validate_required([:id_external])
   end
 end
