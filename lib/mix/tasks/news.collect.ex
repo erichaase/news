@@ -18,9 +18,9 @@ defmodule Mix.Tasks.News.Collect do
 
   # TODO: run this asynchronous
   defp process_story(id) do
-    HackerNews.get_story(id)
-    |> build_post
-    |> upsert_post
+    if post = HackerNews.get_story(id) do
+      post |> build_post |> upsert_post
+    end
   end
 
   defp build_post(story) do
@@ -30,11 +30,11 @@ defmodule Mix.Tasks.News.Collect do
       title: story["title"],
       n_points: story["score"],
       n_comments: story["descendants"],
-      published_at: build_published_at(story["time"])
+      published_at: to_datetime(story["time"])
     }
   end
 
-  defp build_published_at(unix_time) do
+  defp to_datetime(unix_time) do
     case DateTime.from_unix(unix_time) do
       {:ok, datetime} -> datetime
       _               -> nil
@@ -42,7 +42,11 @@ defmodule Mix.Tasks.News.Collect do
   end
 
   defp upsert_post(post) do
-    Mix.shell.info(inspect post, pretty: true)
+    case News.Repo.insert(post, on_conflict: :replace_all, conflict_target: :id_external) do
+      {:ok, p} -> Mix.shell.info(inspect p, pretty: true)
+      # TODO: add notifications for these errors
+      {:error, cs} -> Mix.shell.error(inspect cs, pretty: true)
+    end
   end
 end
 
