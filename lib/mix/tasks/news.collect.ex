@@ -11,7 +11,7 @@ defmodule Mix.Tasks.News.Collect do
     # start app so that we can access database
     Mix.Task.run "app.start"
 
-    HackerNews.get_new_story_ids
+    News.HackerNews.get_new_story_ids
     # |> Enum.slice(0, 1)
     |> Enum.map(&start_task/1)
     |> Enum.each(&Task.await/1)
@@ -24,7 +24,7 @@ defmodule Mix.Tasks.News.Collect do
 
   # TODO: move this into its own module/file
   def process_story(id) do
-    if post = HackerNews.get_story(id) do
+    if post = News.HackerNews.get_story(id) do
       post |> build_post |> upsert_post
     end
   end
@@ -52,33 +52,6 @@ defmodule Mix.Tasks.News.Collect do
       {:ok, p} -> Mix.shell.info(inspect p)
       # TODO: add notifications for these errors
       {:error, cs} -> Mix.shell.error(inspect cs, pretty: true)
-    end
-  end
-end
-
-
-# TODO: namespace this and move it into its own file
-defmodule HackerNews do
-  use Tesla
-
-  plug Tesla.Middleware.BaseUrl, "https://hacker-news.firebaseio.com"
-  plug Tesla.Middleware.JSON
-
-  def get_new_story_ids do
-    get("/v0/newstories.json")
-    |> process_response
-  end
-
-  def get_story(id) do
-    get("/v0/item/#{id}.json")
-    |> process_response
-  end
-
-  defp process_response(r) do
-    case r.status do
-      200 -> r.body
-      # TODO: return {:ok, stories} tuple instead
-      _   -> raise inspect %{status: r.status, body: r.body}
     end
   end
 end
