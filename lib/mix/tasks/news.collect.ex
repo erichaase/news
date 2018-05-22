@@ -18,7 +18,7 @@ defmodule Mix.Tasks.News.Collect do
   end
 
   defp start_task(story_id) do
-    # TODO: avoid parent crashing when child crashes
+    # TODO: spawn task under a supervisor so that child crashing doesn't crash parent process
     Task.async(News.ProcessStoryTask, :process_story, [story_id])
   end
 end
