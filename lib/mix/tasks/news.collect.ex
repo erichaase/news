@@ -11,7 +11,7 @@ defmodule Mix.Tasks.News.Collect do
     # start app so that we can access database
     Mix.Task.run "app.start"
 
-    News.HackerNews.get_new_story_ids
+    News.HackerNewsClient.get_new_story_ids
     # |> Enum.slice(0, 1)
     |> Enum.map(&start_task/1)
     |> Enum.each(&Task.await/1)
@@ -24,7 +24,7 @@ defmodule Mix.Tasks.News.Collect do
 
   # TODO: move this into its own module/file
   def process_story(id) do
-    if post = News.HackerNews.get_story(id) do
+    if post = News.HackerNewsClient.get_story(id) do
       post |> build_post |> upsert_post
     end
   end

@@ -1,4 +1,4 @@
-defmodule News.HackerNews do
+defmodule News.HackerNewsClient do
   @moduledoc """
     Client for Hacker News API
   """
