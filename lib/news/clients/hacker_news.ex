@@ -20,9 +20,8 @@ defmodule News.HackerNewsClient do
 
   defp process_response(r) do
     case r.status do
-      200 -> r.body
-      # TODO: return {:ok, stories} tuple instead
-      _ -> raise inspect %{status: r.status, body: r.body}
+      200 -> {:ok, r.body}
+      _   -> {:error, inspect(%{status: r.status, body: r.body})}
     end
   end
 end

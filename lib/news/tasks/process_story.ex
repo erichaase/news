@@ -4,10 +4,13 @@ defmodule News.ProcessStoryTask do
   """
 
   def process_story(id) do
-    if post = News.HackerNewsClient.get_story(id) do
-      post |> build_post |> upsert_post
-    end
+    News.HackerNewsClient.get_story(id)
+    |> validate_response
+    |> build_post
+    |> upsert_post
   end
+
+  defp validate_response({:ok, story}) when is_map(story), do: story
 
   defp build_post(story) do
     %News.Post{
@@ -27,9 +30,5 @@ defmodule News.ProcessStoryTask do
     end
   end
 
-  defp upsert_post(post) do
-    {:ok, p} = News.Repo.insert(post, on_conflict: :replace_all, conflict_target: :id_external)
-    Mix.shell.info(inspect p)
-    p
-  end
+  defp upsert_post(post), do: {:ok, _} = News.Repo.insert(post, on_conflict: :replace_all, conflict_target: :id_external)
 end
