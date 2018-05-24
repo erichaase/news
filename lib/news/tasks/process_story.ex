@@ -28,10 +28,8 @@ defmodule News.ProcessStoryTask do
   end
 
   defp upsert_post(post) do
-    case News.Repo.insert(post, on_conflict: :replace_all, conflict_target: :id_external) do
-      {:ok, p} -> Mix.shell.info(inspect p)
-      # TODO: add notifications for these errors
-      {:error, cs} -> Mix.shell.error(inspect cs, pretty: true)
-    end
+    {:ok, p} = News.Repo.insert(post, on_conflict: :replace_all, conflict_target: :id_external)
+    Mix.shell.info(inspect p)
+    p
   end
 end
